@@ -177,14 +177,37 @@ namespace ShareX.UploadersLib.FileUploaders
             {
                 try
                 {
-                    using (Stream remoteStream = client.OpenWrite(remotePath))
+                    using (FtpDataStream remoteStream = (FtpDataStream)client.OpenWrite(remotePath))
                     {
+                        FtpReply r = remoteStream.CommandStatus;
+                        DebugHelper.WriteLine();
+                        DebugHelper.WriteLine("CommandStatus Response to STOR:");
+                        DebugHelper.WriteLine("CommandStatus Code: {0}", r.Code);
+                        DebugHelper.WriteLine("CommandStatus Message: {0}", r.Message);
+                        DebugHelper.WriteLine("CommandStatus Informational: {0}", r.InfoMessages);
+
                         DebugHelper.WriteLine("Before transfer, Ftp client connected? {0}", client.IsConnected);
                         bool result = TransferData(localStream, remoteStream);
                         DebugHelper.WriteLine("After transfer directory {0}", client.GetWorkingDirectory());
                         DebugHelper.WriteLine("After transfer, Ftp client connected? {0}", client.IsConnected);
                         FtpReply reply = client.Execute("SIZE " + remotePath);
                         DebugHelper.WriteLine("Size of {0} on server? {1}", remotePath, reply.Message);
+
+                        r = remoteStream.Close();
+                        DebugHelper.WriteLine();
+                        DebugHelper.WriteLine("CommandStatus Response after close:");
+                        DebugHelper.WriteLine("CommandStatus Code: {0}", r.Code);
+                        DebugHelper.WriteLine("CommandStatus Message: {0}", r.Message);
+                        DebugHelper.WriteLine("CommandStatus Informational: {0}", r.InfoMessages);
+
+                        if (client.HashAlgorithms != FtpHashAlgorithm.NONE)
+                        {
+                            DebugHelper.WriteLine("Local and remote hashses match? {0}", client.GetHash(remotePath).Verify(localStream));
+                        }
+                        else
+                        {
+                            DebugHelper.WriteLine("Remote hash check not available");
+                        }
                         return result;
                     }
                 }
