@@ -307,6 +307,7 @@ namespace ShareX
 
         private static void Run()
         {
+            DebugHelper.Logger.Async = false;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

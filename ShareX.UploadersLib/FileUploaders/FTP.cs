@@ -183,6 +183,8 @@ namespace ShareX.UploadersLib.FileUploaders
                         bool result = TransferData(localStream, remoteStream);
                         DebugHelper.WriteLine("After transfer directory {0}", client.GetWorkingDirectory());
                         DebugHelper.WriteLine("After transfer, Ftp client connected? {0}", client.IsConnected);
+                        FtpReply reply = client.Execute("SIZE " + remotePath);
+                        DebugHelper.WriteLine("Size of {0} on server? {1}", remotePath, reply.Message);
                         return result;
                     }
                 }

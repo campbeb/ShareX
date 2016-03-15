@@ -478,6 +478,9 @@ namespace ShareX.UploadersLib
                 }
             }
             DebugHelper.WriteLine("{0}: Read {1} bytes", loopCount, bytesRead);
+            DebugHelper.WriteLine("{0}: Wrote {1} bytes", loopCount++, requestStream.Length);
+            requestStream.Flush();
+            DebugHelper.WriteLine("{0}: Wrote {1} bytes", loopCount++, requestStream.Length);
 
             return !StopUploadRequested;
         }
