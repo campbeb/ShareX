@@ -179,7 +179,11 @@ namespace ShareX.UploadersLib.FileUploaders
                 {
                     using (Stream remoteStream = client.OpenWrite(remotePath))
                     {
-                        return TransferData(localStream, remoteStream);
+                        DebugHelper.WriteLine("Before transfer, Ftp client connected? {0}", client.IsConnected);
+                        bool result = TransferData(localStream, remoteStream);
+                        DebugHelper.WriteLine("After transfer directory {0}", client.GetWorkingDirectory());
+                        DebugHelper.WriteLine("After transfer, Ftp client connected? {0}", client.IsConnected);
+                        return result;
                     }
                 }
                 catch (FtpCommandException e)

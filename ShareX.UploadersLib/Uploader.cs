@@ -461,10 +461,15 @@ namespace ShareX.UploadersLib
             ProgressManager progress = new ProgressManager(dataStream.Length);
             int length = (int)Math.Min(BufferSize, dataStream.Length);
             byte[] buffer = new byte[length];
-            int bytesRead;
+            int bytesRead = 0;
+            DebugHelper.WriteLine("Preparing to transfer {0} bytes", dataStream.Length);
+            int loopCount = 1;
 
             while (!StopUploadRequested && (bytesRead = dataStream.Read(buffer, 0, length)) > 0)
             {
+                DebugHelper.WriteLine("{0}: Read {1} bytes", loopCount, bytesRead);
+                loopCount++;
+
                 requestStream.Write(buffer, 0, bytesRead);
 
                 if (AllowReportProgress && progress.UpdateProgress(bytesRead))
@@ -472,6 +477,7 @@ namespace ShareX.UploadersLib
                     OnProgressChanged(progress);
                 }
             }
+            DebugHelper.WriteLine("{0}: Read {1} bytes", loopCount, bytesRead);
 
             return !StopUploadRequested;
         }
