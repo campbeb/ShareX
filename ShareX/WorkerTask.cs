@@ -232,6 +232,12 @@ namespace ShareX
             filename = URLHelpers.GetFileName(filename);
             filename = Helpers.GetValidFileName(filename);
 
+            if (task.Info.TaskSettings.UploadSettings.FileUploadUseNamePattern)
+            {
+                string ext = Path.GetExtension(filename);
+                filename = TaskHelpers.GetFilename(task.Info.TaskSettings, ext);
+            }
+
             if (string.IsNullOrEmpty(filename))
             {
                 return null;
@@ -1421,7 +1427,7 @@ namespace ShareX
             }
             catch (Exception e)
             {
-                MessageBox.Show("ShareX - " + Resources.TaskManager_task_UploadCompleted_Error, e.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(e.Message, "ShareX - " + Resources.TaskManager_task_UploadCompleted_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
