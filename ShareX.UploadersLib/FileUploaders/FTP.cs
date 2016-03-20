@@ -181,6 +181,10 @@ namespace ShareX.UploadersLib.FileUploaders
                     {
                         bool result = TransferData(localStream, remoteStream);
                         remoteStream.Close();
+                        FtpReply r = ((FtpDataStream)remoteStream).Close();
+                        DebugHelper.WriteLine("CommandStatus Response after close:");
+                        DebugHelper.WriteLine("CommandStatus Code: {0}", r.Code);
+                        DebugHelper.WriteLine("CommandStatus Message: {0}", r.Message);
                         return result;
                     }
                 }
