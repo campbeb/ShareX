@@ -930,6 +930,7 @@ namespace Greenshot
             new BidirectionalBinding(previewQualityUpDown, "Value", surface.FieldAggregator.GetField(FieldType.PREVIEW_QUALITY), "Value", DecimalDoublePercentageConverter.GetInstance(), NotNullValidator.GetInstance());
             new BidirectionalBinding(obfuscateModeButton, "SelectedTag", surface.FieldAggregator.GetField(FieldType.PREPARED_FILTER_OBFUSCATE), "Value");
             new BidirectionalBinding(highlightModeButton, "SelectedTag", surface.FieldAggregator.GetField(FieldType.PREPARED_FILTER_HIGHLIGHT), "Value");
+            new BidirectionalBinding(arrowHeadsDropDownButton, "SelectedTag", surface.FieldAggregator.GetField(FieldType.ARROWHEADS), "Value", NotNullValidator.GetInstance());
         }
 
         /// <summary>
@@ -1043,11 +1044,6 @@ namespace Greenshot
 
             // finally show/hide field controls depending on the fields of selected elements
             refreshFieldControls();
-        }
-
-        private void ArrowHeadsToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            surface.FieldAggregator.GetField(FieldType.ARROWHEADS).Value = (ArrowContainer.ArrowHeadCombination)((ToolStripMenuItem)sender).Tag;
         }
 
         private void FontPropertyChanged(object sender, EventArgs e)

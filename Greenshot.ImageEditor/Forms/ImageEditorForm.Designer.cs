@@ -162,7 +162,7 @@ namespace Greenshot {
             this.pixelSizeLabel = new GreenshotPlugin.Controls.GreenshotToolStripLabel();
             this.pixelSizeUpDown = new Greenshot.Controls.ToolStripNumericUpDown();
             this.arrowHeadsLabel = new GreenshotPlugin.Controls.GreenshotToolStripLabel();
-            this.arrowHeadsDropDownButton = new GreenshotPlugin.Controls.GreenshotToolStripDropDownButton();
+            this.arrowHeadsDropDownButton = new Greenshot.Controls.BindableToolStripDropDownButton();
             this.arrowHeadStartMenuItem = new GreenshotPlugin.Controls.GreenshotToolStripMenuItem();
             this.arrowHeadEndMenuItem = new GreenshotPlugin.Controls.GreenshotToolStripMenuItem();
             this.arrowHeadBothMenuItem = new GreenshotPlugin.Controls.GreenshotToolStripMenuItem();
@@ -234,7 +234,7 @@ namespace Greenshot {
             // 
             // toolsToolStrip
             // 
-            this.toolsToolStrip.ImageScalingSize = coreConfiguration.IconSize;
+            this.toolsToolStrip.ImageScalingSize = GreenshotForm.coreConfiguration.IconSize;
             this.toolsToolStrip.ClickThrough = true;
             this.toolsToolStrip.Dock = System.Windows.Forms.DockStyle.None;
             this.toolsToolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
@@ -491,10 +491,10 @@ namespace Greenshot {
             // 
 			this.propertiesToolStrip.AutoSize = false;
             this.propertiesToolStrip.ClickThrough = true;
-			this.propertiesToolStrip.ImageScalingSize = coreConfiguration.IconSize;
+			this.propertiesToolStrip.ImageScalingSize = GreenshotForm.coreConfiguration.IconSize;
             this.propertiesToolStrip.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertiesToolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-			this.propertiesToolStrip.MinimumSize = new System.Drawing.Size(150, coreConfiguration.IconSize.Height + 10);
+			this.propertiesToolStrip.MinimumSize = new System.Drawing.Size(150, GreenshotForm.coreConfiguration.IconSize.Height + 10);
 			this.propertiesToolStrip.Name = "propertiesToolStrip";
             this.propertiesToolStrip.Padding = new System.Windows.Forms.Padding(3, 3, 3, 0);
             this.propertiesToolStrip.Stretch = true;
@@ -1419,38 +1419,40 @@ namespace Greenshot {
             this.arrowHeadsDropDownButton.LanguageKey = "editor_arrowheads";
             this.arrowHeadsDropDownButton.Name = "arrowHeadsDropDownButton";
             this.arrowHeadsDropDownButton.Text = "Arrow heads";
+            this.arrowHeadsDropDownButton.SelectedTag = Greenshot.Drawing.ArrowContainer.ArrowHeadCombination.BOTH;
+            this.arrowHeadsDropDownButton.Tag = Greenshot.Drawing.ArrowContainer.ArrowHeadCombination.BOTH;
             // 
             // arrowHeadStartMenuItem
             // 
+            this.arrowHeadStartMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("arrowHeadsDropDownButtonStart.Image")));
             this.arrowHeadStartMenuItem.LanguageKey = "editor_arrowheads_start";
             this.arrowHeadStartMenuItem.Name = "arrowHeadStartMenuItem";
             this.arrowHeadStartMenuItem.Tag = Greenshot.Drawing.ArrowContainer.ArrowHeadCombination.START_POINT;
             this.arrowHeadStartMenuItem.Text = "Start point";
-            this.arrowHeadStartMenuItem.Click += new System.EventHandler(this.ArrowHeadsToolStripMenuItemClick);
             // 
             // arrowHeadEndMenuItem
             // 
+            this.arrowHeadEndMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("arrowHeadsDropDownButtonEnd.Image")));
             this.arrowHeadEndMenuItem.LanguageKey = "editor_arrowheads_end";
             this.arrowHeadEndMenuItem.Name = "arrowHeadEndMenuItem";
             this.arrowHeadEndMenuItem.Tag = Greenshot.Drawing.ArrowContainer.ArrowHeadCombination.END_POINT;
             this.arrowHeadEndMenuItem.Text = "End point";
-            this.arrowHeadEndMenuItem.Click += new System.EventHandler(this.ArrowHeadsToolStripMenuItemClick);
             // 
             // arrowHeadBothMenuItem
             // 
+            this.arrowHeadBothMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("arrowHeadsDropDownButtonBoth.Image")));
             this.arrowHeadBothMenuItem.LanguageKey = "editor_arrowheads_both";
             this.arrowHeadBothMenuItem.Name = "arrowHeadBothMenuItem";
             this.arrowHeadBothMenuItem.Tag = Greenshot.Drawing.ArrowContainer.ArrowHeadCombination.BOTH;
             this.arrowHeadBothMenuItem.Text = "Both";
-            this.arrowHeadBothMenuItem.Click += new System.EventHandler(this.ArrowHeadsToolStripMenuItemClick);
             // 
             // arrowHeadNoneMenuItem
             // 
+            this.arrowHeadNoneMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("arrowHeadsDropDownButtonNone.Image")));
             this.arrowHeadNoneMenuItem.LanguageKey = "editor_arrowheads_none";
             this.arrowHeadNoneMenuItem.Name = "arrowHeadNoneMenuItem";
             this.arrowHeadNoneMenuItem.Tag = Greenshot.Drawing.ArrowContainer.ArrowHeadCombination.NONE;
             this.arrowHeadNoneMenuItem.Text = "None";
-            this.arrowHeadNoneMenuItem.Click += new System.EventHandler(this.ArrowHeadsToolStripMenuItemClick);
             // 
             // shadowButton
             // 
@@ -1568,7 +1570,7 @@ namespace Greenshot {
 		private GreenshotPlugin.Controls.GreenshotToolStripLabel fontSizeLabel;
 		private Greenshot.Controls.ToolStripNumericUpDown brightnessUpDown;
         private GreenshotPlugin.Controls.GreenshotToolStripLabel brightnessLabel;
-		private GreenshotPlugin.Controls.GreenshotToolStripDropDownButton arrowHeadsDropDownButton;
+		private Greenshot.Controls.BindableToolStripDropDownButton arrowHeadsDropDownButton;
 		private GreenshotPlugin.Controls.GreenshotToolStripLabel arrowHeadsLabel;
 		private Greenshot.Controls.ToolStripNumericUpDown pixelSizeUpDown;
 		private GreenshotPlugin.Controls.GreenshotToolStripLabel pixelSizeLabel;
