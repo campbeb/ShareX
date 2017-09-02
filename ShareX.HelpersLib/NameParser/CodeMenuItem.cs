@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -23,19 +23,24 @@
 
 #endregion License Information (GPL v3)
 
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ShareX.HelpersLib
 {
-    [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.MenuStrip | ToolStripItemDesignerAvailability.ContextMenuStrip)]
-    public class ToolStripLabeledNumericUpDown : ToolStripControlHost
+    public class CodeMenuItem
     {
-        public LabeledNumericUpDown Content => Control as LabeledNumericUpDown;
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Category { get; set; }
 
-        public ToolStripLabeledNumericUpDown(string text) : base(new LabeledNumericUpDown())
+        public CodeMenuItem(string name, string description, string category = null)
         {
-            Content.Text = text;
+            Name = name;
+            Description = description;
+            Category = category;
         }
     }
 }

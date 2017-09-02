@@ -1392,6 +1392,11 @@ namespace ShareX
             UploadManager.ClipboardUploadMainWindow();
         }
 
+        private void tsmiUploadText_Click(object sender, EventArgs e)
+        {
+            UploadManager.ShowTextUploadDialog();
+        }
+
         private void tsmiUploadURL_Click(object sender, EventArgs e)
         {
             UploadManager.UploadURL();
@@ -1400,6 +1405,11 @@ namespace ShareX
         private void tsbDragDropUpload_Click(object sender, EventArgs e)
         {
             TaskHelpers.OpenDropWindow();
+        }
+
+        private void tsmiShortenURL_Click(object sender, EventArgs e)
+        {
+            UploadManager.ShowShortenURLDialog();
         }
 
         private void tsmiColorPicker_Click(object sender, EventArgs e)

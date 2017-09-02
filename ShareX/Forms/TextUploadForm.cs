@@ -23,19 +23,50 @@
 
 #endregion License Information (GPL v3)
 
+using ShareX.HelpersLib;
+using System;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 
-namespace ShareX.HelpersLib
+namespace ShareX
 {
-    [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.MenuStrip | ToolStripItemDesignerAvailability.ContextMenuStrip)]
-    public class ToolStripLabeledNumericUpDown : ToolStripControlHost
+    public partial class TextUploadForm : Form
     {
-        public LabeledNumericUpDown Content => Control as LabeledNumericUpDown;
+        public string Content { get; private set; }
 
-        public ToolStripLabeledNumericUpDown(string text) : base(new LabeledNumericUpDown())
+        public TextUploadForm(string content = null)
         {
-            Content.Text = text;
+            InitializeComponent();
+            Icon = ShareXResources.Icon;
+
+            if (string.IsNullOrEmpty(content) && Clipboard.ContainsText())
+            {
+                content = Clipboard.GetText();
+            }
+
+            if (!string.IsNullOrEmpty(content))
+            {
+                txtContent.Text = content;
+                txtContent.SelectAll();
+            }
+        }
+
+        private void TextUploadForm_Shown(object sender, EventArgs e)
+        {
+            this.ForceActivate();
+        }
+
+        private void btnUpload_Click(object sender, EventArgs e)
+        {
+            Content = txtContent.Text;
+
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

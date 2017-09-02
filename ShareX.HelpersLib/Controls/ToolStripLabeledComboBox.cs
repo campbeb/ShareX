@@ -29,11 +29,11 @@ using System.Windows.Forms.Design;
 namespace ShareX.HelpersLib
 {
     [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.MenuStrip | ToolStripItemDesignerAvailability.ContextMenuStrip)]
-    public class ToolStripLabeledNumericUpDown : ToolStripControlHost
+    public class ToolStripLabeledComboBox : ToolStripControlHost
     {
-        public LabeledNumericUpDown Content => Control as LabeledNumericUpDown;
+        public LabeledComboBox Content => Control as LabeledComboBox;
 
-        public ToolStripLabeledNumericUpDown(string text) : base(new LabeledNumericUpDown())
+        public ToolStripLabeledComboBox(string text) : base(new LabeledComboBox())
         {
             Content.Text = text;
         }
