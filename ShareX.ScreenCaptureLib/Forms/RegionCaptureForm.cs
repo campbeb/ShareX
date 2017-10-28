@@ -49,6 +49,7 @@ namespace ShareX.ScreenCaptureLib
         public int FPS { get; private set; }
         public int MonitorIndex { get; set; }
         public string ImageFilePath { get; set; }
+        public bool IsFullscreen { get; private set; }
 
         public RegionCaptureMode Mode { get; private set; }
 
@@ -82,6 +83,7 @@ namespace ShareX.ScreenCaptureLib
 
         internal ShapeManager ShapeManager { get; private set; }
         internal List<DrawableObject> DrawableObjects { get; private set; }
+        internal bool IsClosing { get; private set; }
 
         internal IContainer components = null;
         internal OpacityAnimation toolbarAnimation;
@@ -89,7 +91,6 @@ namespace ShareX.ScreenCaptureLib
 
         private InputManager InputManager => ShapeManager.InputManager;
 
-        private FormWindowState lastWindowState = FormWindowState.Minimized;
         private TextureBrush backgroundBrush, backgroundHighlightBrush;
         private GraphicsPath regionFillPath, regionDrawPath;
         private Pen borderPen, borderDotPen, borderDotStaticPen, textOuterBorderPen, textInnerBorderPen, markerPen;
@@ -102,16 +103,17 @@ namespace ShareX.ScreenCaptureLib
         private Bitmap bmpBackgroundImage;
         private Cursor defaultCursor;
 
-        public RegionCaptureForm(RegionCaptureMode mode)
+        public RegionCaptureForm(RegionCaptureMode mode, RegionCaptureOptions options)
         {
             Mode = mode;
+            Config = options;
+            IsFullscreen = !IsEditorMode || Config.EditorModeFullscreen;
 
             ScreenRectangle0Based = CaptureHelpers.GetScreenBounds0Based();
             ImageRectangle = ScreenRectangle0Based;
 
             InitializeComponent();
 
-            Config = new RegionCaptureOptions();
             DrawableObjects = new List<DrawableObject>();
             timerStart = new Stopwatch();
             timerFPS = new Stopwatch();
@@ -146,25 +148,45 @@ namespace ShareX.ScreenCaptureLib
             Icon = ShareXResources.Icon;
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint, true);
 
-            if (!IsEditorMode)
+            if (IsEditorMode)
+            {
+                Text = "ShareX - " + "Image editor"; // TODO: Translate
+            }
+            else
             {
                 Text = "ShareX - " + Resources.BaseRegionForm_InitializeComponent_Region_capture;
+            }
+
+            if (IsFullscreen)
+            {
                 StartPosition = FormStartPosition.Manual;
                 FormBorderStyle = FormBorderStyle.None;
                 Bounds = CaptureHelpers.GetScreenBounds();
                 ShowInTaskbar = false;
 #if !DEBUG
-            TopMost = true;
+                TopMost = true;
 #endif
             }
             else
             {
-                Text = "ShareX - " + "Annotate"; // TODO: Translate
                 StartPosition = FormStartPosition.CenterScreen;
                 FormBorderStyle = FormBorderStyle.Sizable;
-                Size = new Size(800, 600);
+                Size = new Size(900, 700);
                 MinimumSize = new Size(800, 600);
-                WindowState = FormWindowState.Maximized;
+
+                if (Config.EditorModeRememberWindowState)
+                {
+                    Config.EditorModeWindowState.ApplyFormState(this);
+                }
+                else if (Config.EditorModeStartMaximized)
+                {
+                    WindowState = FormWindowState.Maximized;
+                }
+                else
+                {
+                    WindowState = FormWindowState.Normal;
+                }
+
                 ShowInTaskbar = true;
             }
 
@@ -174,6 +196,7 @@ namespace ShareX.ScreenCaptureLib
             MouseDown += RegionCaptureForm_MouseDown;
             Resize += RegionCaptureForm_Resize;
             LocationChanged += RegionCaptureForm_LocationChanged;
+            FormClosing += RegionCaptureForm_FormClosing;
 
             ResumeLayout(false);
         }
@@ -216,7 +239,7 @@ namespace ShareX.ScreenCaptureLib
 
             if (IsEditorMode)
             {
-                ImageRectangle = new Rectangle(0, 0, Image.Width, Image.Height);
+                ImageRectangle = new Rectangle(ImageRectangle.X, ImageRectangle.Y, Image.Width, Image.Height);
 
                 using (Bitmap background = new Bitmap(Image.Width, Image.Height))
                 using (Graphics g = Graphics.FromImage(background))
@@ -231,6 +254,7 @@ namespace ShareX.ScreenCaptureLib
                     g.DrawImage(Image, sourceRect);
 
                     backgroundBrush = new TextureBrush(background) { WrapMode = WrapMode.Clamp };
+                    backgroundBrush.TranslateTransform(ImageRectangle.X, ImageRectangle.Y);
                 }
 
                 CenterCanvas();
@@ -265,11 +289,6 @@ namespace ShareX.ScreenCaptureLib
             if (ShapeManager != null)
             {
                 UpdateCoordinates();
-
-                if (IsEditorMode && WindowState != lastWindowState)
-                {
-                    lastWindowState = WindowState;
-                }
 
                 if (IsAnnotationMode && ShapeManager.ToolbarCreated)
                 {
@@ -343,6 +362,7 @@ namespace ShareX.ScreenCaptureLib
         {
             this.ForceActivate();
 
+            OnMoved();
             CenterCanvas();
         }
 
@@ -355,6 +375,16 @@ namespace ShareX.ScreenCaptureLib
         private void RegionCaptureForm_LocationChanged(object sender, EventArgs e)
         {
             OnMoved();
+        }
+
+        private void RegionCaptureForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            IsClosing = true;
+
+            if (IsEditorMode && Config.EditorModeRememberWindowState)
+            {
+                Config.EditorModeWindowState.UpdateFormState(this);
+            }
         }
 
         internal void RegionCaptureForm_KeyDown(object sender, KeyEventArgs e)
@@ -781,9 +811,15 @@ namespace ShareX.ScreenCaptureLib
 
         private void DrawFPS(Graphics g, int offset)
         {
-            Rectangle screenBounds = CaptureHelpers.GetActiveScreenBounds0Based();
+            Point textPosition = new Point(offset, offset);
 
-            g.DrawTextWithShadow(FPS.ToString(), screenBounds.Location.Add(offset), infoFontBig, Brushes.White, Brushes.Black, new Point(0, 1));
+            if (IsFullscreen)
+            {
+                Rectangle rectScreen = CaptureHelpers.GetActiveScreenBounds0Based();
+                textPosition = textPosition.Add(rectScreen.Location);
+            }
+
+            g.DrawTextWithShadow(FPS.ToString(), textPosition, infoFontBig, Brushes.White, Brushes.Black, new Point(0, 1));
         }
 
         private void DrawInfoText(Graphics g, string text, Rectangle rect, Font font, int padding)
@@ -1013,7 +1049,12 @@ namespace ShareX.ScreenCaptureLib
 
         private string GetInfoText()
         {
-            if (Mode == RegionCaptureMode.ScreenColorPicker || Config.UseCustomInfoText)
+            if (IsEditorMode)
+            {
+                Point canvasRelativePosition = new Point(InputManager.MousePosition0Based.X - ImageRectangle.X, InputManager.MousePosition0Based.Y - ImageRectangle.Y);
+                return $"X: {canvasRelativePosition.X} Y: {canvasRelativePosition.Y}";
+            }
+            else if (Mode == RegionCaptureMode.ScreenColorPicker || Config.UseCustomInfoText)
             {
                 Color color = CurrentColor;
 
@@ -1025,7 +1066,7 @@ namespace ShareX.ScreenCaptureLib
                 return string.Format(Resources.RectangleRegion_GetColorPickerText, color.R, color.G, color.B, ColorHelpers.ColorToHex(color), CurrentPosition.X, CurrentPosition.Y);
             }
 
-            return string.Format("X: {0} Y: {1}", CurrentPosition.X, CurrentPosition.Y);
+            return $"X: {CurrentPosition.X} Y: {CurrentPosition.Y}";
         }
 
         private void DrawCrosshair(Graphics g)

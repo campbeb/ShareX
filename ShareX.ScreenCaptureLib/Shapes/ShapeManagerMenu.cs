@@ -52,6 +52,7 @@ namespace ShareX.ScreenCaptureLib
         private ToolStripMenuItem tsmiArrowHeadsBothSide, tsmiShadow, tsmiUndo, tsmiDelete, tsmiDeleteAll, tsmiMoveTop, tsmiMoveUp, tsmiMoveDown, tsmiMoveBottom, tsmiRegionCapture, tsmiQuickCrop, tsmiTips;
         private ToolStripLabeledNumericUpDown tslnudBorderSize, tslnudCornerRadius, tslnudCenterPoints, tslnudBlurRadius, tslnudPixelateSize;
         private ToolStripLabel tslDragLeft;
+        private ToolStripLabel tslDragRight;
         private ToolStripLabeledComboBox tscbCursorTypes;
 
         internal void CreateToolbar()
@@ -68,7 +69,7 @@ namespace ShareX.ScreenCaptureLib
                 ShowInTaskbar = false,
                 StartPosition = FormStartPosition.Manual,
                 Text = "ShareX - Annotate menu",
-                TopMost = !form.IsEditorMode
+                TopMost = form.IsFullscreen
             };
 
             menuForm.Shown += MenuForm_Shown;
@@ -87,7 +88,7 @@ namespace ShareX.ScreenCaptureLib
                 GripStyle = ToolStripGripStyle.Hidden,
                 Location = new Point(0, 0),
                 MinimumSize = new Size(10, 30),
-                Padding = new Padding(0, 1, 0, 0),
+                Padding = form.IsEditorMode ? new Padding(5, 1, 3, 0) : new Padding(0, 1, 0, 0),
                 Renderer = new CustomToolStripProfessionalRenderer(),
                 TabIndex = 0,
                 ShowItemToolTips = false
@@ -112,15 +113,18 @@ namespace ShareX.ScreenCaptureLib
 
             menuForm.Controls.Add(tsMain);
 
-            tslDragLeft = new ToolStripLabel()
+            if (form.IsFullscreen)
             {
-                DisplayStyle = ToolStripItemDisplayStyle.Image,
-                Image = Resources.ui_radio_button_uncheck,
-                Margin = new Padding(2, 0, 2, 0),
-                Padding = new Padding(2)
-            };
+                tslDragLeft = new ToolStripLabel()
+                {
+                    DisplayStyle = ToolStripItemDisplayStyle.Image,
+                    Image = Resources.ui_radio_button_uncheck,
+                    Margin = new Padding(0, 0, 2, 0),
+                    Padding = new Padding(2)
+                };
 
-            tsMain.Items.Add(tslDragLeft);
+                tsMain.Items.Add(tslDragLeft);
+            }
 
             if (form.IsEditorMode)
             {
@@ -648,65 +652,68 @@ namespace ShareX.ScreenCaptureLib
 
             tsMain.Items.Add(new ToolStripSeparator());
 
-            #region Capture
-
-            ToolStripDropDownButton tsddbCapture = new ToolStripDropDownButton(Resources.ShapeManager_CreateContextMenu_Capture);
-            tsddbCapture.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsddbCapture.Image = Resources.camera;
-            tsMain.Items.Add(tsddbCapture);
-
-            tsmiRegionCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_CaptureRegions);
-            tsmiRegionCapture.Image = Resources.layer;
-            tsmiRegionCapture.ShortcutKeyDisplayString = "Enter";
-            tsmiRegionCapture.MouseDown += (sender, e) =>
+            if (!form.IsEditorMode)
             {
-                form.UpdateRegionPath();
-                form.Close(RegionResult.Region);
-            };
-            tsddbCapture.DropDownItems.Add(tsmiRegionCapture);
+                #region Capture
 
-            if (RegionCaptureForm.LastRegionFillPath != null)
-            {
-                ToolStripMenuItem tsmiLastRegionCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_LastRegion);
-                tsmiLastRegionCapture.Image = Resources.layers;
-                tsmiLastRegionCapture.MouseDown += (sender, e) => form.Close(RegionResult.LastRegion);
-                tsddbCapture.DropDownItems.Add(tsmiLastRegionCapture);
-            }
+                ToolStripDropDownButton tsddbCapture = new ToolStripDropDownButton(Resources.ShapeManager_CreateContextMenu_Capture);
+                tsddbCapture.DisplayStyle = ToolStripItemDisplayStyle.Image;
+                tsddbCapture.Image = Resources.camera;
+                tsMain.Items.Add(tsddbCapture);
 
-            ToolStripMenuItem tsmiFullscreenCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_fullscreen);
-            tsmiFullscreenCapture.Image = Resources.layer_fullscreen;
-            tsmiFullscreenCapture.ShortcutKeyDisplayString = "Space";
-            tsmiFullscreenCapture.MouseDown += (sender, e) => form.Close(RegionResult.Fullscreen);
-            tsddbCapture.DropDownItems.Add(tsmiFullscreenCapture);
-
-            ToolStripMenuItem tsmiActiveMonitorCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_active_monitor);
-            tsmiActiveMonitorCapture.Image = Resources.monitor;
-            tsmiActiveMonitorCapture.ShortcutKeyDisplayString = "~";
-            tsmiActiveMonitorCapture.MouseDown += (sender, e) => form.Close(RegionResult.ActiveMonitor);
-            tsddbCapture.DropDownItems.Add(tsmiActiveMonitorCapture);
-
-            ToolStripMenuItem tsmiMonitorCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_monitor);
-            tsmiMonitorCapture.HideImageMargin();
-            tsmiMonitorCapture.Image = Resources.monitor_window;
-            tsddbCapture.DropDownItems.Add(tsmiMonitorCapture);
-
-            Screen[] screens = Screen.AllScreens;
-
-            for (int i = 0; i < screens.Length; i++)
-            {
-                Screen screen = screens[i];
-                ToolStripMenuItem tsmi = new ToolStripMenuItem($"{screen.Bounds.Width}x{screen.Bounds.Height}");
-                tsmi.ShortcutKeyDisplayString = (i + 1).ToString();
-                int index = i;
-                tsmi.MouseDown += (sender, e) =>
+                tsmiRegionCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_CaptureRegions);
+                tsmiRegionCapture.Image = Resources.layer;
+                tsmiRegionCapture.ShortcutKeyDisplayString = "Enter";
+                tsmiRegionCapture.MouseDown += (sender, e) =>
                 {
-                    form.MonitorIndex = index;
-                    form.Close(RegionResult.Monitor);
+                    form.UpdateRegionPath();
+                    form.Close(RegionResult.Region);
                 };
-                tsmiMonitorCapture.DropDownItems.Add(tsmi);
-            }
+                tsddbCapture.DropDownItems.Add(tsmiRegionCapture);
 
-            #endregion Capture
+                if (RegionCaptureForm.LastRegionFillPath != null)
+                {
+                    ToolStripMenuItem tsmiLastRegionCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_LastRegion);
+                    tsmiLastRegionCapture.Image = Resources.layers;
+                    tsmiLastRegionCapture.MouseDown += (sender, e) => form.Close(RegionResult.LastRegion);
+                    tsddbCapture.DropDownItems.Add(tsmiLastRegionCapture);
+                }
+
+                ToolStripMenuItem tsmiFullscreenCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_fullscreen);
+                tsmiFullscreenCapture.Image = Resources.layer_fullscreen;
+                tsmiFullscreenCapture.ShortcutKeyDisplayString = "Space";
+                tsmiFullscreenCapture.MouseDown += (sender, e) => form.Close(RegionResult.Fullscreen);
+                tsddbCapture.DropDownItems.Add(tsmiFullscreenCapture);
+
+                ToolStripMenuItem tsmiActiveMonitorCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_active_monitor);
+                tsmiActiveMonitorCapture.Image = Resources.monitor;
+                tsmiActiveMonitorCapture.ShortcutKeyDisplayString = "~";
+                tsmiActiveMonitorCapture.MouseDown += (sender, e) => form.Close(RegionResult.ActiveMonitor);
+                tsddbCapture.DropDownItems.Add(tsmiActiveMonitorCapture);
+
+                ToolStripMenuItem tsmiMonitorCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_monitor);
+                tsmiMonitorCapture.HideImageMargin();
+                tsmiMonitorCapture.Image = Resources.monitor_window;
+                tsddbCapture.DropDownItems.Add(tsmiMonitorCapture);
+
+                Screen[] screens = Screen.AllScreens;
+
+                for (int i = 0; i < screens.Length; i++)
+                {
+                    Screen screen = screens[i];
+                    ToolStripMenuItem tsmi = new ToolStripMenuItem($"{screen.Bounds.Width}x{screen.Bounds.Height}");
+                    tsmi.ShortcutKeyDisplayString = (i + 1).ToString();
+                    int index = i;
+                    tsmi.MouseDown += (sender, e) =>
+                    {
+                        form.MonitorIndex = index;
+                        form.Close(RegionResult.Monitor);
+                    };
+                    tsmiMonitorCapture.DropDownItems.Add(tsmi);
+                }
+
+                #endregion Capture
+            }
 
             #region Options
 
@@ -714,6 +721,29 @@ namespace ShareX.ScreenCaptureLib
             tsddbOptions.DisplayStyle = ToolStripItemDisplayStyle.Image;
             tsddbOptions.Image = Resources.gear;
             tsMain.Items.Add(tsddbOptions);
+
+            if (form.IsEditorMode)
+            {
+                ToolStripMenuItem tsmiEditorModeStartMaximized = new ToolStripMenuItem("Start editor maximized");
+                tsmiEditorModeStartMaximized.Checked = Config.EditorModeStartMaximized;
+                tsmiEditorModeStartMaximized.CheckOnClick = true;
+                tsmiEditorModeStartMaximized.Click += (sender, e) => Config.EditorModeStartMaximized = tsmiEditorModeStartMaximized.Checked;
+                tsddbOptions.DropDownItems.Add(tsmiEditorModeStartMaximized);
+
+                ToolStripMenuItem tsmiEditorModeRememberWindowState = new ToolStripMenuItem("Remember editor window state");
+                tsmiEditorModeRememberWindowState.Checked = Config.EditorModeRememberWindowState;
+                tsmiEditorModeRememberWindowState.CheckOnClick = true;
+                tsmiEditorModeRememberWindowState.Click += (sender, e) => Config.EditorModeRememberWindowState = tsmiEditorModeRememberWindowState.Checked;
+                tsddbOptions.DropDownItems.Add(tsmiEditorModeRememberWindowState);
+
+                ToolStripMenuItem tsmiEditorModeFullscreen = new ToolStripMenuItem("Start editor fullscreen");
+                tsmiEditorModeFullscreen.Checked = Config.EditorModeFullscreen;
+                tsmiEditorModeFullscreen.CheckOnClick = true;
+                tsmiEditorModeFullscreen.Click += (sender, e) => Config.EditorModeFullscreen = tsmiEditorModeFullscreen.Checked;
+                tsddbOptions.DropDownItems.Add(tsmiEditorModeFullscreen);
+
+                tsddbOptions.DropDownItems.Add(new ToolStripSeparator());
+            }
 
             if (!form.IsEditorMode)
             {
@@ -810,23 +840,26 @@ namespace ShareX.ScreenCaptureLib
 
             #endregion Options
 
-            ToolStripLabel tslDragRight = new ToolStripLabel()
+            if (form.IsFullscreen)
             {
-                Alignment = ToolStripItemAlignment.Right,
-                DisplayStyle = ToolStripItemDisplayStyle.Image,
-                Image = Resources.ui_radio_button_uncheck,
-                Margin = new Padding(0, 0, 2, 0),
-                Padding = new Padding(2)
-            };
+                tslDragRight = new ToolStripLabel()
+                {
+                    Alignment = ToolStripItemAlignment.Right,
+                    DisplayStyle = ToolStripItemDisplayStyle.Image,
+                    Image = Resources.ui_radio_button_uncheck,
+                    Margin = new Padding(0, 0, 2, 0),
+                    Padding = new Padding(2)
+                };
 
-            tsMain.Items.Add(tslDragRight);
+                tsMain.Items.Add(tslDragRight);
 
-            tslDragLeft.MouseDown += TslDrag_MouseDown;
-            tslDragRight.MouseDown += TslDrag_MouseDown;
-            tslDragLeft.MouseEnter += TslDrag_MouseEnter;
-            tslDragRight.MouseEnter += TslDrag_MouseEnter;
-            tslDragLeft.MouseLeave += TslDrag_MouseLeave;
-            tslDragRight.MouseLeave += TslDrag_MouseLeave;
+                tslDragLeft.MouseDown += TslDrag_MouseDown;
+                tslDragRight.MouseDown += TslDrag_MouseDown;
+                tslDragLeft.MouseEnter += TslDrag_MouseEnter;
+                tslDragRight.MouseEnter += TslDrag_MouseEnter;
+                tslDragLeft.MouseLeave += TslDrag_MouseLeave;
+                tslDragRight.MouseLeave += TslDrag_MouseLeave;
+            }
 
             foreach (ToolStripItem tsi in tsMain.Items.OfType<ToolStripItem>())
             {
@@ -941,24 +974,29 @@ namespace ShareX.ScreenCaptureLib
 
         internal void UpdateMenuPosition()
         {
-            Rectangle rectScreen = form.RectangleToScreen(form.ScreenRectangle0Based);
+            Rectangle rectScreen;
 
-            if (Config.RememberMenuState && rectScreen.Contains(Config.MenuPosition))
+            if (form.IsFullscreen)
             {
-                menuForm.Location = Config.MenuPosition;
+                rectScreen = CaptureHelpers.GetActiveScreenBounds();
+                rectScreen.Y += 20;
             }
             else
             {
-                //Rectangle rectActiveScreen = CaptureHelpers.GetActiveScreenBounds();
+                rectScreen = form.RectangleToScreen(form.ScreenRectangle0Based);
+            }
 
-                if (tsMain.Width < rectScreen.Width)
-                {
-                    menuForm.Location = new Point(rectScreen.X + rectScreen.Width / 2 - tsMain.Width / 2, rectScreen.Y);
-                }
-                else
-                {
-                    menuForm.Location = rectScreen.Location;
-                }
+            if (!form.IsEditorMode && Config.RememberMenuState && rectScreen.Contains(Config.MenuPosition))
+            {
+                menuForm.Location = Config.MenuPosition;
+            }
+            else if (tsMain.Width < rectScreen.Width)
+            {
+                menuForm.Location = new Point(rectScreen.X + rectScreen.Width / 2 - tsMain.Width / 2, rectScreen.Y);
+            }
+            else
+            {
+                menuForm.Location = rectScreen.Location;
             }
         }
 
@@ -1042,7 +1080,7 @@ namespace ShareX.ScreenCaptureLib
 
         private void UpdateMenu()
         {
-            if (menuForm == null) return;
+            if (form.IsClosing || menuForm == null || menuForm.IsDisposed) return;
 
             ShapeType shapeType = CurrentShapeType;
 
